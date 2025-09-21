@@ -21,7 +21,10 @@ class HttpSecurityConfiguration {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.antMatcher("/**")
+            http.authorizeRequests()
+                    .antMatchers("/users/health").permitAll()
+                    .anyRequest().authenticated()
+                    .and()
                     .addFilterAfter(jwtAuthenticationFilter, BasicAuthenticationFilter.class);
         }
     }

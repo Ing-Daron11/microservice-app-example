@@ -35,7 +35,8 @@ EXPOSE 8083
 
 # Healthcheck usando Spring Boot Actuator endpoint o endpoint básico
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8083/users/ || exit 1
+  CMD curl -f http://localhost:8083/users/health || exit 1
+
 
 # Variables de entorno por defecto
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
