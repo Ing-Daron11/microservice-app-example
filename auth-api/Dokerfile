@@ -1,38 +1,42 @@
 # Build stage
-FROM golang:1.16-alpine AS builder
+FROM golang:1.18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install dep (dependency management tool)
-RUN go get -u github.com/golang/dep/cmd/dep
+# Instalar dependencias de compilación
+RUN apk add --no-cache git
 
-# Copy dependency files
+# Instalar dep (para manejar dependencias)
+RUN go install github.com/golang/dep/cmd/dep@latest
+
+# Copiar archivos de dependencias
 COPY Gopkg.toml Gopkg.lock ./
 
-# Install dependencies
+# Instalar dependencias
 RUN dep ensure -vendor-only
 
-# Copy source code
+# Copiar el código fuente
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o auth-api .
+# Compilar la aplicación
+RUN go build -o auth-api .
 
 # Production stage
-FROM alpine:latest
+FROM alpine:3.17
 
-# Install ca-certificates for HTTPS calls
+# Certificados para llamadas HTTPS
 RUN apk --no-cache add ca-certificates
 
-# Set working directory
 WORKDIR /root/
 
-# Copy the binary from builder stage
+# Copiar el binario compilado
 COPY --from=builder /app/auth-api .
 
-# Expose port (default Go apps often run on 8080, but this will be configured via ENV)
-EXPOSE 8080
+# Variables de entorno (por defecto, se pueden sobreescribir en docker-compose)
+ENV AUTH_API_PORT=8000 \
+    USERS_API_ADDRESS=http://users-api:8081 \
+    JWT_SECRET=PRFT
 
-# Run the application
+EXPOSE 8000
+
 CMD ["./auth-api"]
