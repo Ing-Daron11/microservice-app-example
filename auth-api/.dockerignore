@@ -1,0 +1,13 @@
+# Ignorar dependencias y builds
+vendor/
+bin/
+*.exe
+*.out
+
+# Ignorar git
+.git
+.gitignore
+
+# Ignorar docs
+README.md
+*.md

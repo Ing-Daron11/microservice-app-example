@@ -1,0 +1,38 @@
+# Build stage
+FROM golang:1.16-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Install dep (dependency management tool)
+RUN go get -u github.com/golang/dep/cmd/dep
+
+# Copy dependency files
+COPY Gopkg.toml Gopkg.lock ./
+
+# Install dependencies
+RUN dep ensure -vendor-only
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o auth-api .
+
+# Production stage
+FROM alpine:latest
+
+# Install ca-certificates for HTTPS calls
+RUN apk --no-cache add ca-certificates
+
+# Set working directory
+WORKDIR /root/
+
+# Copy the binary from builder stage
+COPY --from=builder /app/auth-api .
+
+# Expose port (default Go apps often run on 8080, but this will be configured via ENV)
+EXPOSE 8080
+
+# Run the application
+CMD ["./auth-api"]
