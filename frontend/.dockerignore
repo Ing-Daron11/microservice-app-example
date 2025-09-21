@@ -19,7 +19,6 @@ coverage
 .vscode
 .idea
 dist
-build
 .eslintcache
 *.tgz
 *.tar.gz

@@ -2,18 +2,15 @@
 FROM maven:3.8.6-openjdk-8-slim AS builder
 WORKDIR /app
 
-# Copiar archivos de configuración Maven
+# Copiar pom.xml primero para cachear dependencias
 COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
-COPY mvnw.cmd .
 
 # Descargar dependencias (se cachea si no cambia pom.xml)
-RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Copiar código fuente y compilar
 COPY src ./src
-RUN ./mvnw clean package -DskipTests -B
+RUN mvn clean package -DskipTests -B
 
 # Stage 2: Runtime stage
 FROM openjdk:8-jre-alpine AS runtime

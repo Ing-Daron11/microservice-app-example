@@ -74,7 +74,7 @@ services:
   auth-api:
     build: 
       context: ./auth-api
-      dockerfile: Dokerfile  # Nota: Mantuve el nombre original del Dockerfile
+      dockerfile: Dockerfile 
     container_name: microapp-auth-api
     ports:
       - "8081:8081"

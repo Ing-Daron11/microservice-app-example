@@ -1,51 +1,52 @@
-# Multi-stage build para optimizar la imagen final
-FROM node:18-alpine AS deps
+# ============================================================
+# Stage 1: Build (con Node antiguo para compatibilidad)
+# ============================================================
+FROM node:8.17.0 AS builder
+
+# Set working directory
 WORKDIR /app
 
-# Copiar archivos de dependencias
+# Copiar package.json e instalar dependencias
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
 
-# Stage 2: Build
-FROM node:18-alpine AS builder
-WORKDIR /app
+# Instalar dependencias
+RUN npm install
 
-# Copiar dependencias ya instaladas
-COPY --from=deps /app/node_modules ./node_modules
-# Copiar código fuente
+# Copiar el resto del código fuente
 COPY . .
 
-# Build para producción
+# Build del frontend
 RUN npm run build
 
-# Stage 3: Production con nginx simple
+# ============================================================
+# Stage 2: Producción (servir con Nginx)
+# ============================================================
 FROM nginx:alpine AS production
+
+# Directorio de Nginx
 WORKDIR /usr/share/nginx/html
 
-# Remover archivos por defecto de nginx
+# Limpiar contenido por defecto
 RUN rm -rf ./*
 
-# Copiar archivos buildados
-COPY --from=builder /app/dist .
+# Copiar archivos generados del builder
+COPY --from=builder /app/dist . 
 
-# Crear usuario no-root
-RUN addgroup -g 1001 -S nodejs && adduser -S nginx -u 1001 -G nodejs
+# Copiar configuración de Nginx si la necesitas (opcional)
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Cambiar ownership
-RUN chown -R nginx:nodejs /usr/share/nginx/html
-RUN chown -R nginx:nodejs /var/cache/nginx
-RUN chown -R nginx:nodejs /var/log/nginx
-RUN touch /var/run/nginx.pid
-RUN chown -R nginx:nodejs /var/run/nginx.pid
+# Ajustar permisos usando el usuario ya existente 'nginx'
+RUN chown -R nginx:nginx /usr/share/nginx/html
 
 USER nginx
 
-# Puerto por defecto
+# Exponer puerto
 EXPOSE 80
 
-# Healthcheck
+# Healthcheck (opcional)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
 # Comando por defecto
 CMD ["nginx", "-g", "daemon off;"]
+

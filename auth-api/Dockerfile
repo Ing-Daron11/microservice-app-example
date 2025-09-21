@@ -6,17 +6,11 @@ WORKDIR /app
 # Instalar dependencias de compilación
 RUN apk add --no-cache git
 
-# Instalar dep (para manejar dependencias)
-RUN go install github.com/golang/dep/cmd/dep@latest
-
-# Copiar archivos de dependencias
-COPY Gopkg.toml Gopkg.lock ./
-
-# Instalar dependencias
-RUN dep ensure -vendor-only
-
 # Copiar el código fuente
 COPY . .
+
+# Inicializar go modules y descargar dependencias
+RUN go mod init auth-api && go mod tidy
 
 # Compilar la aplicación
 RUN go build -o auth-api .
