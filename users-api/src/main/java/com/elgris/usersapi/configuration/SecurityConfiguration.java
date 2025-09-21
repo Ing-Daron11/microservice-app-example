@@ -22,10 +22,10 @@ class HttpSecurityConfiguration {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.authorizeRequests()
-                    .antMatchers("/users/health").permitAll()
-                    .anyRequest().authenticated()
-                    .and()
-                    .addFilterAfter(jwtAuthenticationFilter, BasicAuthenticationFilter.class);
+            .antMatchers("/users/health", "/actuator/health").permitAll()
+            .anyRequest().authenticated()
+            .and()
+            .addFilterAfter(jwtAuthenticationFilter, BasicAuthenticationFilter.class);
         }
     }
 }

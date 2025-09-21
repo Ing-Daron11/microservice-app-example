@@ -28,6 +28,13 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         final HttpServletResponse response = (HttpServletResponse) res;
         final String authHeader = request.getHeader("authorization");
 
+        // Excepciones: rutas que no necesitan autenticación
+        String path = request.getRequestURI();
+        if (path.equals("/users/health") || path.equals("/actuator/health")) {
+            chain.doFilter(req, res);
+            return;
+        }
+
         if ("OPTIONS".equals(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
 
