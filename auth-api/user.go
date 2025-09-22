@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -55,6 +57,9 @@ func (h *UserService) getUser(ctx context.Context, username string) (User, error
 	if err != nil {
 		return user, err
 	}
+	
+	log.Printf("Generated JWT token for user '%s': %s", username, token)
+	
 	url := fmt.Sprintf("%s/users/%s", h.UserAPIAddress, username)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -86,5 +91,7 @@ func (h *UserService) getUserAPIToken(username string) (string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
 	claims["scope"] = "read"
+	claims["iat"] = time.Now().Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // Token expires in 24 hours
 	return token.SignedString([]byte(jwtSecret))
 }

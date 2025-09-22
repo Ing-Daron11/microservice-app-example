@@ -32,21 +32,19 @@ RUN rm -rf ./*
 # Copiar archivos generados del builder
 COPY --from=builder /app/dist . 
 
-# Copiar configuración de Nginx si la necesitas (opcional)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copiar configuración personalizada de nginx
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Ajustar permisos usando el usuario ya existente 'nginx'
-RUN chown -R nginx:nginx /usr/share/nginx/html
-
-USER nginx
+# Instalar wget para healthcheck
+RUN apk add --no-cache wget
 
 # Exponer puerto
 EXPOSE 80
 
-# Healthcheck (opcional)
+# Healthcheck simple
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
-# Comando por defecto
+# Comando por defecto (ejecutar como root para evitar problemas de permisos)
 CMD ["nginx", "-g", "daemon off;"]
 

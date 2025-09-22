@@ -23,12 +23,10 @@ public class UsersController {
         return "OK";
     }
 
-
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public List<User> getUsers() {
         List<User> response = new LinkedList<>();
         userRepository.findAll().forEach(response::add);
-
         return response;
     }
 
@@ -41,12 +39,16 @@ public class UsersController {
         }
 
         Claims claims = (Claims) requestAttribute;
+        String tokenUsername = (String)claims.get("username");
+        String tokenScope = (String)claims.get("scope");
 
-        if (!username.equalsIgnoreCase((String)claims.get("username"))) {
+        // Permitir acceso si:
+        // 1. El usuario solicita sus propios datos, OR
+        // 2. El token tiene scope "read" (para comunicación entre servicios)
+        if (!username.equalsIgnoreCase(tokenUsername) && !"read".equals(tokenScope)) {
             throw new AccessDeniedException("No access for requested entity");
         }
 
         return userRepository.findOneByUsername(username);
     }
-
 }
