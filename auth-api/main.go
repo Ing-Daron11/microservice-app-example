@@ -31,6 +31,8 @@ func main() {
 	if len(envJwtSecret) != 0 {
 		jwtSecret = envJwtSecret
 	}
+	
+	log.Printf("Using JWT secret (first 10 chars): %s...", jwtSecret[:10])
 
 	userService := UserService{
 		Client:         http.DefaultClient,
