@@ -27,7 +27,7 @@ FROM nginx:alpine AS production
 WORKDIR /usr/share/nginx/html
 
 #Limpiar contenido por defecto
-RUN rm -rf ./
+RUN rm -rf ./*
 
 #Copiar archivos generados del builder
 COPY --from=builder /app/dist . 
