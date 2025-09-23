@@ -106,3 +106,13 @@ module "networking" {
   microservices      = local.microservices
   tags               = local.common_tags
 }
+
+# Container Apps Configuration (Variables de entorno y URLs)
+module "container_apps_config" {
+  source = "../../modules/container-apps-config"
+  
+  prefix                            = local.prefix
+  container_app_environment_domain  = "proudsky-12345.eastus.azurecontainerapps.io"  # Placeholder - se actualizará cuando tu compañero cree el environment
+  jwt_secret                       = "myfancysecret"
+  tags                            = local.common_tags
+}

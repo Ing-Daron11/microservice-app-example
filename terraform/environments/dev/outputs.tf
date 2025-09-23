@@ -61,3 +61,34 @@ output "cost_optimization" {
     total_memory_gb       = sum([for ms in local.microservices : ms.memory_gb])
   }
 }
+
+# =============================================================================
+# CONTAINER APPS CONFIGURATION OUTPUTS
+# =============================================================================
+
+output "service_environment_variables" {
+  description = "Variables de entorno por servicio para Container Apps"
+  value       = module.container_apps_config.service_environment_variables
+  sensitive   = true  # Contiene JWT_SECRET
+}
+
+output "internal_service_urls" {
+  description = "URLs internas para comunicación entre Container Apps"
+  value       = module.container_apps_config.internal_urls
+}
+
+output "external_service_urls" {
+  description = "URLs externas para acceso desde frontend"
+  value       = module.container_apps_config.external_urls
+}
+
+output "container_apps_ready_config" {
+  description = "Configuración lista para usar en Container Apps"
+  value = {
+    environment_variables = module.container_apps_config.service_environment_variables
+    internal_urls        = module.container_apps_config.internal_urls
+    external_urls        = module.container_apps_config.external_urls
+    microservices_config = local.microservices
+  }
+  sensitive = true
+}
