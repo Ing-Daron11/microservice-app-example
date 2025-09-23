@@ -79,7 +79,7 @@ output "internal_service_urls" {
 
 output "external_service_urls" {
   description = "URLs externas para acceso desde frontend"
-  value       = module.container_apps_config.external_urls
+  value       = module.container_apps.container_apps
 }
 
 output "container_apps_ready_config" {
@@ -87,7 +87,7 @@ output "container_apps_ready_config" {
   value = {
     environment_variables = module.container_apps_config.service_environment_variables
     internal_urls        = module.container_apps_config.internal_urls
-    external_urls        = module.container_apps_config.external_urls
+    external_urls        = module.container_apps.container_apps
     microservices_config = local.microservices
   }
   sensitive = true

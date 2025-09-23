@@ -26,16 +26,16 @@ WORKDIR /root/
 # Copiar el binario compilado
 COPY --from=builder /app/auth-api .
 
-# Variables de entorno
-ENV AUTH_API_PORT=8081 \
-    USERS_API_ADDRESS=http://users-api:8083 \
+# Variables de entorno - Container Apps usan puerto 80
+ENV AUTH_API_PORT=80 \
+    USERS_API_ADDRESS=http://microapp-dev-users-api-ca:80 \
     JWT_SECRET=myfancysecret
 
-# Exponer el puerto correcto
-EXPOSE 8081
+# Exponer el puerto 80 para Container Apps
+EXPOSE 80
 
-# Healthcheck CORREGIDO - usar curl con GET en lugar de wget con HEAD
+# Healthcheck usando puerto 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=5 \
-  CMD curl -f http://localhost:8081/version || exit 1
+  CMD curl -f http://localhost:80/version || exit 1
 
 CMD ["./auth-api"]
