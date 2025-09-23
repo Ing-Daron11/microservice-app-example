@@ -33,12 +33,15 @@ RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-# Puerto esperado por la aplicación
-EXPOSE 8082
+# Puerto esperado por la aplicación - Container Apps usan puerto 80
+EXPOSE 80
+
+# Variable de entorno para puerto
+ENV TODO_API_PORT=80
 
 # Healthcheck usando el endpoint /health que no requiere autenticación
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:8082/health || exit 1
+  CMD curl -f http://localhost:80/health || exit 1
 
 # Ejecutar en producción sin nodemon
 CMD ["node", "server.js"]
