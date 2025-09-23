@@ -61,3 +61,46 @@ output "cost_optimization" {
     total_memory_gb       = sum([for ms in local.microservices : ms.memory_gb])
   }
 }
+
+
+# Container Apps outputs (NUEVO)
+output "container_apps_environment" {
+  description = "Container Apps Environment información"
+  value = {
+    id   = module.container_apps.container_app_environment_id
+    name = module.container_apps.container_app_environment_name
+  }
+}
+
+output "application_urls" {
+  description = "URLs de la aplicación desplegada"
+  value = module.container_apps.container_apps
+}
+
+output "frontend_url" {
+  description = "URL principal de la aplicación"
+  value       = module.container_apps.frontend_url
+}
+
+output "zipkin_url" {
+  description = "URL de Zipkin para distributed tracing"
+  value       = module.container_apps.zipkin_url
+}
+
+output "deployment_summary" {
+  description = "Resumen completo del deployment"
+  value = {
+    infrastructure = {
+      resource_group = module.resource_group.name
+      location       = module.resource_group.location
+      acr_name       = module.acr.name
+      vnet_name      = module.networking.vnet_name
+    }
+    application = {
+      frontend_url = module.container_apps.frontend_url
+      zipkin_url   = module.container_apps.zipkin_url
+      services     = length(local.microservices)
+    }
+    costs = module.container_apps.cost_summary
+  }
+}

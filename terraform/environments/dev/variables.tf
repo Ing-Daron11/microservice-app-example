@@ -28,3 +28,10 @@ variable "vm_size_student" {
   type        = string
   default     = "Standard_B1s"  # 1 vCPU, 1GB RAM - ~$7.59/mes
 }
+
+variable "jwt_secret" {
+  description = "JWT secret para autenticación entre microservicios"
+  type        = string
+  default     = "myfancysecret"
+  sensitive   = true
+}

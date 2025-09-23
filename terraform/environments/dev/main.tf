@@ -106,3 +106,28 @@ module "networking" {
   microservices      = local.microservices
   tags               = local.common_tags
 }
+
+# Container Apps (NUEVO)
+module "container_apps" {
+  source = "../../modules/container-apps"
+  
+  prefix              = local.prefix
+  location           = module.resource_group.location
+  resource_group_name = module.resource_group.name
+  microservices      = local.microservices
+  
+  # ACR credentials para pull de imágenes
+  acr_login_server    = module.acr.login_server
+  acr_admin_username  = module.acr.admin_username
+  acr_admin_password  = module.acr.admin_password
+  
+  # JWT secret para comunicación entre servicios
+  jwt_secret         = var.jwt_secret
+  
+  tags               = local.common_tags
+  
+  depends_on = [
+    module.acr,
+    module.networking
+  ]
+}
