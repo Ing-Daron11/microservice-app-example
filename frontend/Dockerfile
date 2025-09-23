@@ -33,7 +33,7 @@ RUN rm -rf ./*
 COPY --from=builder /app/dist . 
 
 # Copiar configuración personalizada de nginx
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Instalar wget para healthcheck
 RUN apk add --no-cache wget

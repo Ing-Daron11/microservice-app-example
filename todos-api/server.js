@@ -56,7 +56,7 @@ redisClient.on('ready', () => {
     console.log('🚀 Redis client ready');
 });
 
-const port = process.env.TODO_API_PORT || 8082
+const port = process.env.TODO_API_PORT || 80
 const jwtSecret = process.env.JWT_SECRET || "foo"
 
 const app = express()
