@@ -30,16 +30,16 @@ RUN chown appuser:appgroup app.jar
 
 USER appuser
 
-# Puerto que usa la aplicación
-EXPOSE 8083
+# Puerto que usa la aplicación - Container Apps usan puerto 80
+EXPOSE 80
 
 # Healthcheck usando el endpoint /users/health que ya está configurado sin JWT
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8083/users/health || exit 1
+  CMD curl -f http://localhost:80/users/health || exit 1
 
 # Variables de entorno por defecto
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
-ENV SERVER_PORT=8083
+ENV SERVER_PORT=80
 ENV JWT_SECRET=myfancysecret
 
 # Comando para ejecutar la aplicación

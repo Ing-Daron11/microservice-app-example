@@ -92,6 +92,7 @@ resource "azurerm_container_app" "zipkin" {
   tags = var.tags
 }
 
+
 # Microservicios usando configuración dinámica
 resource "azurerm_container_app" "microservices" {
   for_each = { for k, v in var.microservices : k => v if k != "shared-services" }
@@ -108,7 +109,7 @@ resource "azurerm_container_app" "microservices" {
       cpu    = each.value.cpu_cores
       memory = "${each.value.memory_gb}Gi"
 
-      # Variables de entorno desde el módulo de tu compañero
+      # Variables de entorno desde el módulo
       dynamic "env" {
         for_each = var.service_environment_variables[each.key]
         content {
@@ -124,7 +125,7 @@ resource "azurerm_container_app" "microservices" {
 
   ingress {
     external_enabled = each.key == "frontend" ? true : false
-    target_port      = each.value.container_port
+    target_port      = 80  # IMPORTANTE: Todos los servicios usan puerto 80 en Container Apps
 
     traffic_weight {
       percentage      = 100
@@ -148,48 +149,3 @@ resource "azurerm_container_app" "microservices" {
   depends_on = [azurerm_container_app.redis, azurerm_container_app.zipkin]
 }
 
-# Log Message Processor Container App (sin ingress)
-resource "azurerm_container_app" "log_processor" {
-  name                         = "${var.prefix}-log-processor-ca"
-  container_app_environment_id = azurerm_container_app_environment.main.id
-  resource_group_name          = var.resource_group_name
-  revision_mode                = "Single"
-
-  template {
-    container {
-      name   = "log-processor"
-      image  = "${var.acr_login_server}/log-message-processor:latest"
-      cpu    = 0.25
-      memory = "0.5Gi"
-
-      # Variables de entorno desde el módulo de tu compañero
-      dynamic "env" {
-        for_each = var.service_environment_variables["log-message-processor"]
-        content {
-          name  = env.key
-          value = env.value
-        }
-      }
-    }
-
-    min_replicas = 1
-    max_replicas = 1
-  }
-
-  # Log processor NO necesita ingress - solo procesamiento interno
-
-  secret {
-    name  = "acr-password"
-    value = var.acr_admin_password
-  }
-
-  registry {
-    server   = var.acr_login_server
-    username = var.acr_admin_username
-    password_secret_name = "acr-password"
-  }
-
-  tags = var.tags
-
-  depends_on = [azurerm_container_app.redis]
-}
