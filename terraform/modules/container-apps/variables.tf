@@ -42,6 +42,12 @@ variable "acr_admin_password" {
   sensitive   = true
 }
 
+# NUEVA VARIABLE (trabajo de tu compañero)
+variable "service_environment_variables" {
+  description = "Variables de entorno por servicio (desde container-apps-config)"
+  type        = map(map(string))
+}
+
 variable "jwt_secret" {
   description = "JWT secret para autenticación entre servicios"
   type        = string

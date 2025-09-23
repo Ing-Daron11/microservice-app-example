@@ -1,4 +1,4 @@
-# terraform/modules/container-apps/main.tf
+# terraform/modules/container-apps/main.tf - VERSIÓN CORREGIDA
 resource "azurerm_container_app_environment" "main" {
   name                       = "${var.prefix}-env"
   location                   = var.location
@@ -14,14 +14,14 @@ resource "azurerm_log_analytics_workspace" "main" {
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "PerGB2018"
-  retention_in_days   = 30  # Mínimo para ahorrar costos
+  retention_in_days   = 30
 
   tags = var.tags
 }
 
 # Redis Container App (shared service) - SIN INGRESS
 resource "azurerm_container_app" "redis" {
-  name                         = "${var.prefix}-redis"
+  name                         = "${var.prefix}-redis-ca"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = var.resource_group_name
   revision_mode                = "Single"
@@ -33,9 +33,13 @@ resource "azurerm_container_app" "redis" {
       cpu    = 0.25
       memory = "0.5Gi"
 
-      env {
-        name  = "REDIS_SAVE"
-        value = ""  # Disable persistence for demo
+      # Variables de entorno desde el módulo de tu compañero
+      dynamic "env" {
+        for_each = var.service_environment_variables["redis"]
+        content {
+          name  = env.key
+          value = env.value
+        }
       }
     }
 
@@ -49,7 +53,7 @@ resource "azurerm_container_app" "redis" {
 
 # Zipkin Container App
 resource "azurerm_container_app" "zipkin" {
-  name                         = "${var.prefix}-zipkin"
+  name                         = "${var.prefix}-zipkin-ca"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = var.resource_group_name
   revision_mode                = "Single"
@@ -61,9 +65,13 @@ resource "azurerm_container_app" "zipkin" {
       cpu    = 0.25
       memory = "0.5Gi"
 
-      env {
-        name  = "STORAGE_TYPE"
-        value = "mem"
+      # Variables de entorno desde el módulo de tu compañero
+      dynamic "env" {
+        for_each = var.service_environment_variables["zipkin"]
+        content {
+          name  = env.key
+          value = env.value
+        }
       }
     }
 
@@ -72,7 +80,7 @@ resource "azurerm_container_app" "zipkin" {
   }
 
   ingress {
-    external_enabled = true
+    external_enabled = true  # Público para que puedan ver trazas
     target_port      = 9411
 
     traffic_weight {
@@ -84,35 +92,29 @@ resource "azurerm_container_app" "zipkin" {
   tags = var.tags
 }
 
-# Users API Container App
-resource "azurerm_container_app" "users_api" {
-  name                         = "${var.prefix}-users-api"
+# Microservicios usando configuración dinámica
+resource "azurerm_container_app" "microservices" {
+  for_each = { for k, v in var.microservices : k => v if k != "shared-services" }
+
+  name                         = "${var.prefix}-${each.key}-ca"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = var.resource_group_name
   revision_mode                = "Single"
 
   template {
     container {
-      name   = "users-api"
-      image  = "${var.acr_login_server}/users-api:latest"
-      cpu    = var.microservices["users-api"].cpu_cores
-      memory = "${var.microservices["users-api"].memory_gb}Gi"
+      name   = each.key
+      image  = "${var.acr_login_server}/${each.key}:latest"
+      cpu    = each.value.cpu_cores
+      memory = "${each.value.memory_gb}Gi"
 
-      env {
-        name  = "SERVER_PORT"
-        value = tostring(var.microservices["users-api"].container_port)
-      }
-      env {
-        name  = "JWT_SECRET"
-        value = var.jwt_secret
-      }
-      env {
-        name  = "SPRING_PROFILES_ACTIVE"
-        value = "azure"
-      }
-      env {
-        name  = "SPRING_ZIPKIN_BASE_URL"
-        value = "http://${var.prefix}-zipkin"
+      # Variables de entorno desde el módulo de tu compañero
+      dynamic "env" {
+        for_each = var.service_environment_variables[each.key]
+        content {
+          name  = env.key
+          value = env.value
+        }
       }
     }
 
@@ -121,8 +123,8 @@ resource "azurerm_container_app" "users_api" {
   }
 
   ingress {
-    external_enabled = false
-    target_port      = var.microservices["users-api"].container_port
+    external_enabled = each.key == "frontend" ? true : false
+    target_port      = each.value.container_port
 
     traffic_weight {
       percentage      = 100
@@ -143,144 +145,12 @@ resource "azurerm_container_app" "users_api" {
 
   tags = var.tags
 
-  depends_on = [azurerm_container_app.zipkin]
+  depends_on = [azurerm_container_app.redis, azurerm_container_app.zipkin]
 }
 
-# Auth API Container App
-resource "azurerm_container_app" "auth_api" {
-  name                         = "${var.prefix}-auth-api"
-  container_app_environment_id = azurerm_container_app_environment.main.id
-  resource_group_name          = var.resource_group_name
-  revision_mode                = "Single"
-
-  template {
-    container {
-      name   = "auth-api"
-      image  = "${var.acr_login_server}/auth-api:latest"
-      cpu    = var.microservices["auth-api"].cpu_cores
-      memory = "${var.microservices["auth-api"].memory_gb}Gi"
-
-      env {
-        name  = "AUTH_API_PORT"
-        value = tostring(var.microservices["auth-api"].container_port)
-      }
-      env {
-        name  = "JWT_SECRET"
-        value = var.jwt_secret
-      }
-      env {
-        name  = "USERS_API_ADDRESS"
-        value = "http://${var.prefix}-users-api"
-      }
-      env {
-        name  = "ZIPKIN_URL"
-        value = "http://${var.prefix}-zipkin:9411/api/v2/spans"
-      }
-    }
-
-    min_replicas = 1
-    max_replicas = 3
-  }
-
-  ingress {
-    external_enabled = false
-    target_port      = var.microservices["auth-api"].container_port
-
-    traffic_weight {
-      percentage      = 100
-      latest_revision = true
-    }
-  }
-
-  secret {
-    name  = "acr-password"
-    value = var.acr_admin_password
-  }
-
-  registry {
-    server   = var.acr_login_server
-    username = var.acr_admin_username
-    password_secret_name = "acr-password"
-  }
-
-  tags = var.tags
-
-  depends_on = [azurerm_container_app.users_api]
-}
-
-# Todos API Container App (con Cache-Aside)
-resource "azurerm_container_app" "todos_api" {
-  name                         = "${var.prefix}-todos-api"
-  container_app_environment_id = azurerm_container_app_environment.main.id
-  resource_group_name          = var.resource_group_name
-  revision_mode                = "Single"
-
-  template {
-    container {
-      name   = "todos-api"
-      image  = "${var.acr_login_server}/todos-api:latest"
-      cpu    = var.microservices["todos-api"].cpu_cores
-      memory = "${var.microservices["todos-api"].memory_gb}Gi"
-
-      env {
-        name  = "TODO_API_PORT"
-        value = tostring(var.microservices["todos-api"].container_port)
-      }
-      env {
-        name  = "JWT_SECRET"
-        value = var.jwt_secret
-      }
-      env {
-        name  = "REDIS_HOST"
-        value = "${var.prefix}-redis"
-      }
-      env {
-        name  = "REDIS_PORT"
-        value = "6379"
-      }
-      env {
-        name  = "REDIS_CHANNEL"
-        value = "log_channel"
-      }
-      env {
-        name  = "ZIPKIN_URL"
-        value = "http://${var.prefix}-zipkin:9411/api/v2/spans"
-      }
-    }
-
-    min_replicas = 1
-    max_replicas = 3
-  }
-
-  ingress {
-    external_enabled = false
-    target_port      = var.microservices["todos-api"].container_port
-
-    traffic_weight {
-      percentage      = 100
-      latest_revision = true
-    }
-  }
-
-  secret {
-    name  = "acr-password"
-    value = var.acr_admin_password
-  }
-
-  registry {
-    server   = var.acr_login_server
-    username = var.acr_admin_username
-    password_secret_name = "acr-password"
-  }
-
-  tags = var.tags
-
-  depends_on = [azurerm_container_app.redis, azurerm_container_app.auth_api]
-}
-
-# Log Message Processor Container App
+# Log Message Processor Container App (sin ingress)
 resource "azurerm_container_app" "log_processor" {
-  name                         = "${var.prefix}-log-processor"
+  name                         = "${var.prefix}-log-processor-ca"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = var.resource_group_name
   revision_mode                = "Single"
@@ -292,21 +162,13 @@ resource "azurerm_container_app" "log_processor" {
       cpu    = 0.25
       memory = "0.5Gi"
 
-      env {
-        name  = "REDIS_HOST"
-        value = "${var.prefix}-redis"
-      }
-      env {
-        name  = "REDIS_PORT"
-        value = "6379"
-      }
-      env {
-        name  = "REDIS_CHANNEL"
-        value = "log_channel"
-      }
-      env {
-        name  = "ZIPKIN_URL"
-        value = "http://${var.prefix}-zipkin:9411/api/v2/spans"
+      # Variables de entorno desde el módulo de tu compañero
+      dynamic "env" {
+        for_each = var.service_environment_variables["log-message-processor"]
+        content {
+          name  = env.key
+          value = env.value
+        }
       }
     }
 
@@ -330,56 +192,4 @@ resource "azurerm_container_app" "log_processor" {
   tags = var.tags
 
   depends_on = [azurerm_container_app.redis]
-}
-
-# Frontend Container App
-resource "azurerm_container_app" "frontend" {
-  name                         = "${var.prefix}-frontend"
-  container_app_environment_id = azurerm_container_app_environment.main.id
-  resource_group_name          = var.resource_group_name
-  revision_mode                = "Single"
-
-  template {
-    container {
-      name   = "frontend"
-      image  = "${var.acr_login_server}/frontend:latest"
-      cpu    = var.microservices["frontend"].cpu_cores
-      memory = "${var.microservices["frontend"].memory_gb}Gi"
-
-      # El frontend Vue.js obtiene las URLs desde el nginx.conf
-      # No necesita variables de entorno de APIs internas
-    }
-
-    min_replicas = 1
-    max_replicas = 3
-  }
-
-  ingress {
-    external_enabled = true
-    target_port      = var.microservices["frontend"].container_port
-
-    traffic_weight {
-      percentage      = 100
-      latest_revision = true
-    }
-  }
-
-  secret {
-    name  = "acr-password"
-    value = var.acr_admin_password
-  }
-
-  registry {
-    server   = var.acr_login_server
-    username = var.acr_admin_username
-    password_secret_name = "acr-password"
-  }
-
-  tags = var.tags
-
-  depends_on = [
-    azurerm_container_app.auth_api,
-    azurerm_container_app.todos_api,
-    azurerm_container_app.users_api
-  ]
 }

@@ -17,7 +17,6 @@ terraform {
 # Configurar el provider de Azure (automático con az login)
 provider "azurerm" {
   features {}
-  # subscription_id y tenant_id se toman automáticamente de az login
 }
 
 # Variables locales optimizadas para estudiante
@@ -75,7 +74,7 @@ locals {
   }
 }
 
-# Resource group (ya existente)
+# Resource group
 module "resource_group" {
   source = "../../modules/resource-group"
   
@@ -107,7 +106,15 @@ module "networking" {
   tags               = local.common_tags
 }
 
-# Container Apps (NUEVO)
+module "container_apps_config" {
+  source = "../../modules/container-apps-config"
+  
+  prefix                           = local.prefix
+  container_app_environment_domain = "proudsky-12345.eastus.azurecontainerapps.io" # Se actualizará después
+  jwt_secret                       = var.jwt_secret
+  tags                            = local.common_tags
+}
+
 module "container_apps" {
   source = "../../modules/container-apps"
   
@@ -121,6 +128,9 @@ module "container_apps" {
   acr_admin_username  = module.acr.admin_username
   acr_admin_password  = module.acr.admin_password
   
+  # Variables de entorno 
+  service_environment_variables = module.container_apps_config.service_environment_variables
+  
   # JWT secret para comunicación entre servicios
   jwt_secret         = var.jwt_secret
   
@@ -128,6 +138,7 @@ module "container_apps" {
   
   depends_on = [
     module.acr,
-    module.networking
+    module.networking,
+    module.container_apps_config
   ]
 }
