@@ -1,0 +1,58 @@
+name: Users API - Build and Push
+
+on:
+  push:
+    branches: [master, develop, 'infra/*']
+    paths:
+      - 'users-api/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'users-api/**'
+
+env:
+  REGISTRY: microappdevacr.azurecr.io
+  SERVICE: users-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Azure Container Registry
+      if: github.ref == 'refs/heads/master'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build and Push to ACR
+      if: github.ref == 'refs/heads/master'
+      uses: docker/build-push-action@v5
+      with:
+        context: ./users-api
+        file: ./users-api/Dockerfile
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.SERVICE }}:latest
+          ${{ env.REGISTRY }}/${{ env.SERVICE }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build Only (No Push)
+      if: github.ref != 'refs/heads/master'
+      uses: docker/build-push-action@v5
+      with:
+        context: ./users-api
+        file: ./users-api/Dockerfile
+        push: false
+        tags: ${{ env.SERVICE }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
