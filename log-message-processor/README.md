@@ -26,4 +26,4 @@ Here you can find the software required to run this microservice, as well as the
 | Python      | 3.6      |
 | Pip         | default  |
 
-`default` is the one comes with Python
+`default` is the one comes with Python# Test pipeline
