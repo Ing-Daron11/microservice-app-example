@@ -22,16 +22,26 @@ ENV NODE_ENV=production
 COPY --from=builder /app .
 COPY --from=deps /app/node_modules ./node_modules
 
+# Instalar curl para healthcheck
+RUN apk add --no-cache curl
+
 # Crear usuario no-root
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Cambiar ownership de archivos al nuevo usuario
+RUN chown -R appuser:appgroup /app
+
 USER appuser
 
-# Puerto esperado por la aplicación (ajusta si tu app usa otro)
-EXPOSE 8082
+# Puerto esperado por la aplicación - Container Apps usan puerto 80
+EXPOSE 80
 
-# Healthcheck usando node (nota: puede fallar si todas las rutas piden token)
+# Variable de entorno para puerto
+ENV TODO_API_PORT=80
+
+# Healthcheck usando el endpoint /health que no requiere autenticación
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:8082',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+  CMD curl -f http://localhost:80/health || exit 1
 
 # Ejecutar en producción sin nodemon
 CMD ["node", "server.js"]

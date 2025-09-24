@@ -20,6 +20,11 @@ var (
 	// ErrWrongCredentials indicates that login attempt failed because of incorrect login or password
 	ErrWrongCredentials = echo.NewHTTPError(http.StatusUnauthorized, "username or password is invalid")
 
+	// ErrServiceUnavailable indicates that authentication service is temporarily unavailable
+	ErrServiceUnavailable = echo.NewHTTPError(http.StatusServiceUnavailable, map[string]string{
+		"error": "Servicio de autenticación temporalmente no disponible. Intente más tarde.",
+	})
+
 	jwtSecret = "myfancysecret"
 )
 
@@ -31,6 +36,8 @@ func main() {
 	if len(envJwtSecret) != 0 {
 		jwtSecret = envJwtSecret
 	}
+	
+	log.Printf("Using JWT secret (first 10 chars): %s...", jwtSecret[:10])
 
 	userService := UserService{
 		Client:         http.DefaultClient,
@@ -40,7 +47,10 @@ func main() {
 			"johnd_foo":   nil,
 			"janed_ddd":   nil,
 		},
+		CircuitBreaker: NewCircuitBreaker(),
 	}
+	
+	log.Printf("🔧 Circuit Breaker inicializado para proteger llamadas a users-api en: %s", userAPIAddress)
 
 	e := echo.New()
 	e.Logger.SetLevel(gommonlog.INFO)
@@ -91,6 +101,12 @@ func getLoginHandler(userService UserService) echo.HandlerFunc {
 		user, err := userService.Login(ctx, requestData.Username, requestData.Password)
 		if err != nil {
 			if err != ErrWrongCredentials {
+				// Verificar si el error es por Circuit Breaker abierto
+				if err.Error() == "circuit breaker is open - authentication service unavailable" {
+					log.Printf("🚨 SECURITY: Login denegado para '%s' - servicio de autenticación no disponible", requestData.Username)
+					return ErrServiceUnavailable
+				}
+				
 				log.Printf("could not authorize user '%s': %s", requestData.Username, err.Error())
 				return ErrHttpGenericMessage
 			}
@@ -99,13 +115,16 @@ func getLoginHandler(userService UserService) echo.HandlerFunc {
 		}
 		token := jwt.New(jwt.SigningMethodHS256)
 
-		// Set claims
+		// Set claims completos (solo llegamos aquí si users-api respondió correctamente)
 		claims := token.Claims.(jwt.MapClaims)
 		claims["username"] = user.Username
 		claims["firstname"] = user.FirstName
 		claims["lastname"] = user.LastName
 		claims["role"] = user.Role
-		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+		claims["iat"] = time.Now().Unix()
+		claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+		
+		log.Printf("🔑 Generando JWT completo para '%s' (users-api funcionando correctamente)", user.Username)
 
 		// Generate encoded token and send it as response.
 		t, err := token.SignedString([]byte(jwtSecret))

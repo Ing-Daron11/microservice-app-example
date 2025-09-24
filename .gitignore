@@ -1,29 +1,299 @@
-# Environment variables
+# =========================
+# ENVIRONMENT VARIABLES
+# =========================
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
-# Docker
-docker-compose.override.yml
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
+# =========================
+# NODE.JS
+# =========================
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+package-lock.json
+.pnpm-debug.log*
 
-# Temporary files
+# =========================
+# BUILD & COVERAGE
+# =========================
+dist/
+build/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+*.out
+
+# =========================
+# DOCKER
+# =========================
+docker-compose.override.yml
+.docker/
+docker-compose.prod.yml
+docker-compose.secrets.yml
+
+# =========================
+# LOGS
+# =========================
+*.log
+logs/
+build.log
+deploy.log
+push.log
+
+# =========================
+# IDE / EDITORS
+# =========================
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# =========================
+# OS FILES
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+Icon
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+.directory
+.Trash-*
+.nfs*
+
+# =========================
+# TEMPORARY FILES
+# =========================
 *.tmp
 *.temp
+*~
+.#*
+\#*#
+.*.swp
+.*.swo
+*.backup
+*.bak
+scripts/*.tmp
+scripts/temp-*
+
+# =========================
+# TERRAFORM
+# =========================
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+crash.*.log
+**/.terraform/
+*.tfvars
+*.tfvars.json
+terraform.tfvars
+terraform.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfplan
+*.plan
+plan.out
+.terraformrc
+terraform.rc
+.terraform.tfstate.lock.info
+backend.tf.backup
+
+# IMPORTANTE: mantener el lock de Terraform en git
+# !.terraform.lock.hcl
+
+# =========================
+# AZURE
+# =========================
+.azure/
+acr-credentials.json
+azure-credentials.json
+*-credentials.*
+*-secrets.*
+
+# =========================
+# SECRETS & SECURITY
+# =========================
+*.pem
+*.ppk
+id_rsa*
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+config/secrets.*
+config/production.*
+.secrets/
+*secret*
+*password*
+*credential*
+
+# =========================
+# GO (auth-api)
+# =========================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+vendor/
+go.work
+go.work.sum
+
+# =========================
+# JAVA (users-api)
+# =========================
+target/
+.gradle/
+buildNumber.properties
+dependency-reduced-pom.xml
+release.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+.metadata
+bin/
+tmp/
+.settings/
+.loadpath
+.recommenders
+*.iws
+*.iml
+*.ipr
+
+# =========================
+# PYTHON (log-message-processor)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+*.mo
+*.pot
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+instance/
+.webassets-cache
+.scrapy
+docs/_build/
+target/
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+.python-version
+Pipfile.lock
+__pypackages__/
+celerybeat-schedule
+celerybeat.pid
+*.sage.py
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.spyderproject
+.spyproject
+.ropeproject
+/site
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# =========================
+# VUE.JS (frontend)
+# =========================
+node_modules/
+dist/
+.env.local
+
+# =========================
+# DATABASE FILES
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+dump.rdb
+
+# =========================
+# CI/CD & K8S
+# =========================
+.github/workflows/*.log
+k8s/secrets/
+kubernetes/secrets/
+**/values-secret.yaml
+**/secrets.yaml
+
+# =========================
+# MONITORING TOOLS
+# =========================
+zipkin-data/
+prometheus-data/
+grafana-data/

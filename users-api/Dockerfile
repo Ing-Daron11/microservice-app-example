@@ -1,5 +1,5 @@
-# Stage 1: Build stage
-FROM maven:3.8.6-openjdk-8-slim AS builder
+# Stage 1: Build stage con imagen Maven más nueva
+FROM maven:3.9.5-amazoncorretto-8 AS builder
 WORKDIR /app
 
 # Copiar pom.xml primero para cachear dependencias
@@ -13,10 +13,10 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # Stage 2: Runtime stage
-FROM openjdk:8-jre-alpine AS runtime
+FROM amazoncorretto:8-alpine AS runtime
 WORKDIR /app
 
-# Instalar herramientas básicas para debugging
+# Instalar herramientas básicas para debugging y curl
 RUN apk add --no-cache curl
 
 # Crear usuario no-root
@@ -30,17 +30,16 @@ RUN chown appuser:appgroup app.jar
 
 USER appuser
 
-# Puerto que usa la aplicación
-EXPOSE 8083
+# Puerto que usa la aplicación - Container Apps usan puerto 80
+EXPOSE 80
 
-# Healthcheck usando Spring Boot Actuator endpoint o endpoint básico
+# Healthcheck usando el endpoint /users/health que ya está configurado sin JWT
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8083/users/health || exit 1
-
+  CMD curl -f http://localhost:80/users/health || exit 1
 
 # Variables de entorno por defecto
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
-ENV SERVER_PORT=8083
+ENV SERVER_PORT=80
 ENV JWT_SECRET=myfancysecret
 
 # Comando para ejecutar la aplicación
