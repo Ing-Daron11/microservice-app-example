@@ -2,7 +2,7 @@ name: Terraform Infrastructure
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - 'terraform/**'
   workflow_dispatch:
@@ -60,6 +60,14 @@ jobs:
     - name: Terraform Validate
       working-directory: ./terraform/environments/${{ inputs.environment || 'dev' }}
       run: terraform validate
+
+    - name: Import existing Resource Group
+      working-directory: ./terraform/environments/${{ inputs.environment || 'dev' }}
+      run: |
+        # Try to import resource group if it exists and isn't in state
+        terraform import module.resource_group.azurerm_resource_group.main \
+          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }} || true
+      continue-on-error: true
 
     - name: Terraform Plan
       working-directory: ./terraform/environments/${{ inputs.environment || 'dev' }}
