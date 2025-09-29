@@ -8,7 +8,7 @@ import {HttpLogger} from 'zipkin-transport-http'
 import {zipkinInterceptor} from 'zipkin-instrumentation-vue-resource'
 
 // Zipkin URL - apunta al Container App de Zipkin en Azure
-const ZIPKIN_URL = window.location.hostname === 'localhost' 
+const ZIPKIN_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:9411/zipkin'
   : 'https://microapp-dev-zipkin-ca.gentlecoast-034fc605.eastus.azurecontainerapps.io/'
 /**

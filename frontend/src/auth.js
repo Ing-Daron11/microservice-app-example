@@ -7,7 +7,7 @@ import decode from 'jwt-decode'
  * @var{string} LOGIN_URL The endpoint for logging in. This endpoint should be proxied by Webpack dev server
  *    and maybe nginx in production (cleaner calls and avoids CORS issues).
  */
-const LOGIN_URL = window.location.hostname === 'localhost' 
+const LOGIN_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:8000/login'
   : 'https://microapp-dev-auth-api-ca.gentlecoast-034fc605.eastus.azurecontainerapps.io/login'
 const ROLE_ADMIN = 'ADMIN'
