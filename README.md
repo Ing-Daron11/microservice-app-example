@@ -18,6 +18,11 @@ Take a look at the components diagram that describes them and their interactions
 
 ---
 
+## Architecture update
+
+After completing the project this is the arquitecture diagram we made
+![Arquitecture diagram](images/image15.png)
+
 ## Production Implementation & DevOps Practices
 
 This project has been enhanced with production-ready DevOps practices, cloud deployment strategies, and design patterns implementation.
