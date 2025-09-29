@@ -51,4 +51,4 @@ In case you need to test this API, you can use it as follows:
 Here you can find the software required to run this microservice, as well as the version we have tested. 
 |  Dependency | Version  |
 |-------------|----------|
-| Go          | 1.18.2   |# test pipeline
+| Go          | 1.18.2   |

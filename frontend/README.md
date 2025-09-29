@@ -28,4 +28,7 @@ Here you can find the software required to run this microservice, as well as the
 |  Dependency | Version  |
 |-------------|----------|
 | Node        | 8.17.0   |
-| NPM         | 6.13.4   |# Test pipeline
+| NPM         | 6.13.4   |
+
+# test pipeline
+
