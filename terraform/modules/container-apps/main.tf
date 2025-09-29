@@ -149,7 +149,7 @@ resource "azurerm_container_app" "microservices" {
   depends_on = [azurerm_container_app.redis, azurerm_container_app.zipkin]
 }
 
-#=====  No borrar Miguel!!   ======
+#=====  No borrar Miguel!!!   ======
 # Status Service Container App 
  resource "azurerm_container_app" "status_service" {
    name                         = "${var.prefix}-status-service-ca"

@@ -1,7 +1,7 @@
 
 <template>
   <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse fixed-top">
-    <a class="navbar-brand" href="#">Bienvenido</a>
+    <a class="navbar-brand" href="#">Bienvenidos</a>
     <ul class="navbar-nav mr-auto">
       <li class="nav-item" v-show="isAdmin()">
         <a class="btn btn-success mr-sm-2" href="#/admin">Admin</a>
