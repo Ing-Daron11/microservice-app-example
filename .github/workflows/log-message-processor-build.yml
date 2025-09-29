@@ -43,8 +43,6 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.SERVICE }}:latest
           ${{ env.REGISTRY }}/${{ env.SERVICE }}:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
 
     - name: Build Only (No Push)
       if: github.ref != 'refs/heads/master'
@@ -54,5 +52,3 @@ jobs:
         file: ./log-message-processor/Dockerfile
         push: false
         tags: ${{ env.SERVICE }}:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
