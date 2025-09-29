@@ -61,41 +61,12 @@ jobs:
       working-directory: ./terraform/environments/${{ inputs.environment || 'dev' }}
       run: terraform validate
 
-    - name: Import existing resources
+    - name: Import existing Resource Group
       working-directory: ./terraform/environments/${{ inputs.environment || 'dev' }}
       run: |
-        # Import existing resources if they exist and aren't in state
-        echo "Importing existing resources..."
-        
-        # Resource Group
+        # Try to import resource group if it exists and isn't in state
         terraform import module.resource_group.azurerm_resource_group.main \
           /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }} || true
-        
-        # Virtual Network
-        terraform import module.networking.azurerm_virtual_network.main \
-          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Network/virtualNetworks/microapp-dev-vnet || true
-        
-        # Network Security Groups
-        terraform import 'module.networking.azurerm_network_security_group.microservices["auth-api"]' \
-          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Network/networkSecurityGroups/microapp-dev-auth-api-nsg || true
-        
-        terraform import 'module.networking.azurerm_network_security_group.microservices["users-api"]' \
-          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Network/networkSecurityGroups/microapp-dev-users-api-nsg || true
-        
-        terraform import 'module.networking.azurerm_network_security_group.microservices["todos-api"]' \
-          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Network/networkSecurityGroups/microapp-dev-todos-api-nsg || true
-        
-        terraform import 'module.networking.azurerm_network_security_group.microservices["frontend"]' \
-          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Network/networkSecurityGroups/microapp-dev-frontend-nsg || true
-        
-        terraform import 'module.networking.azurerm_network_security_group.microservices["shared-services"]' \
-          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.Network/networkSecurityGroups/microapp-dev-shared-services-nsg || true
-        
-        # Container Registry (the real one)
-        terraform import module.acr.azurerm_container_registry.main \
-          /subscriptions/270b4efe-9ebd-44f7-ab7e-a468a5d58e77/resourceGroups/${{ env.RESOURCE_GROUP }}/providers/Microsoft.ContainerRegistry/registries/microappdevacryckctn || true
-        
-        echo "Import completed!"
       continue-on-error: true
 
     - name: Terraform Plan

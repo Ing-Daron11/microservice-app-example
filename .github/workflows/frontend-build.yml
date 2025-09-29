@@ -45,20 +45,20 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.SERVICE }}:latest
           ${{ env.REGISTRY }}/${{ env.SERVICE }}:${{ github.sha }}
 
-    - name: Login to Azure CLI
-      if: github.ref == 'refs/heads/master'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    # - name: Login to Azure CLI
+    #   if: github.ref == 'refs/heads/master'
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Update Container App
-      if: github.ref == 'refs/heads/master'
-      run: |
-        az containerapp update \
-          --name microapp-dev-frontend-ca \
-          --resource-group rg-microapp-dev-student \
-          --image ${{ env.REGISTRY }}/${{ env.SERVICE }}:latest \
-          --set-env-vars "FORCE_UPDATE=$(date +%Y%m%d-%H%M%S)"
+    # - name: Update Container App
+    #   if: github.ref == 'refs/heads/master'
+    #   run: |
+    #     az containerapp update \
+    #       --name microapp-dev-frontend-ca \
+    #       --resource-group rg-microapp-dev-student \
+    #       --image ${{ env.REGISTRY }}/${{ env.SERVICE }}:latest \
+    #       --set-env-vars "FORCE_UPDATE=$(date +%Y%m%d-%H%M%S)"
 
     - name: Build Only (No Push)
       if: github.ref != 'refs/heads/master'
