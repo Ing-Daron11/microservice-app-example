@@ -25,5 +25,7 @@ Here you can find the software required to run this microservice, as well as the
 | Redis       | 7.0      |
 | Python      | 3.6      |
 | Pip         | default  |
+test pipeline
+
 
 `default` is the one comes with Python# Test pipeline
