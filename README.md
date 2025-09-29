@@ -183,6 +183,18 @@ Master branch deployments successfully executed end-to-end automation:
 
 ![Production Pipeline Image Placeholder](images/image10.png)
 ---
+## Live test pipelines
+
+Status of the app
+![Status of the app](images/image11.png)
+
+Then we make an small change to see how it works
+![change in front](images/image12.png)
+
+![pipeline executing](images/image13.png)
+
+Now we can see the change in the front
+![change in front](images/image14.png)
 
 ## Deployment Results and Production Readiness
 

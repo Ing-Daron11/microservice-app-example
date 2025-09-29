@@ -29,10 +29,10 @@ var allowedUserHashes = map[string]interface{}{
 func NewCircuitBreaker() *gobreaker.CircuitBreaker {
 	var settings gobreaker.Settings
 	settings.Name = "users-api-breaker"
-	settings.MaxRequests = 3        // Permitir 3 intentos cuando está medio abierto
-	settings.Interval = 60 * time.Second  // Ventana de tiempo para resetear contadores
-	settings.Timeout = 30 * time.Second   // Tiempo abierto antes de intentar de nuevo
-	
+	settings.MaxRequests = 3
+	settings.Interval = 60 * time.Second
+	settings.Timeout = 30 * time.Second
+
 	// ReadyToTrip cuando 50% de las últimas 5 solicitudes fallen
 	settings.ReadyToTrip = func(counts gobreaker.Counts) bool {
 		failureRatio := float64(counts.TotalFailures) / float64(counts.Requests)
@@ -41,16 +41,16 @@ func NewCircuitBreaker() *gobreaker.CircuitBreaker {
 	
 	// Callbacks para logging de demo y seguridad
 	settings.OnStateChange = func(name string, from gobreaker.State, to gobreaker.State) {
-		log.Printf("🔄 Circuit Breaker '%s' cambió estado: %s -> %s", name, from, to)
+		log.Printf("Circuit Breaker '%s' cambió estado: %s -> %s", name, from, to)
 		
 		// Log especial de seguridad cuando se abre el breaker
 		if to == gobreaker.StateOpen {
-			log.Printf("🚨 SECURITY ALERT: Circuit Breaker '%s' ABIERTO - Todos los logins serán DENEGADOS hasta que users-api se recupere", name)
+			log.Printf("SECURITY ALERT: Circuit Breaker '%s' ABIERTO - Todos los logins serán DENEGADOS hasta que users-api se recupere", name)
 		}
 		
 		// Log cuando se cierra y vuelve la normalidad
 		if to == gobreaker.StateClosed {
-			log.Printf("✅ SECURITY: Circuit Breaker '%s' CERRADO - Logins normales restaurados", name)
+			log.Printf("SECURITY: Circuit Breaker '%s' CERRADO - Logins normales restaurados", name)
 		}
 	}
 	
@@ -84,7 +84,7 @@ func (h *UserService) Login(ctx context.Context, username, password string) (Use
 	userKey := fmt.Sprintf("%s_%s", username, password)
 
 	if _, ok := h.AllowedUserHashes[userKey]; !ok {
-		return user, ErrWrongCredentials // this is BAD, business logic layer must not return HTTP-specific errors
+		return user, ErrWrongCredentials
 	}
 
 	return user, nil
@@ -101,10 +101,10 @@ func (h *UserService) getUser(ctx context.Context, username string) (User, error
 	if err != nil {
 		// Si el Circuit Breaker está abierto, denegar el login por seguridad
 		if err == gobreaker.ErrOpenState {
-			log.Printf("🚨 SECURITY: Circuit Breaker ABIERTO - denegando login para '%s' por seguridad", username)
+			log.Printf("SECURITY: Circuit Breaker ABIERTO - denegando login para '%s' por seguridad", username)
 			return user, ErrCircuitBreakerOpen
 		} else {
-			log.Printf("❌ Error llamando users-api para '%s': %s - denegando login", username, err.Error())
+			log.Printf("Error llamando users-api para '%s': %s - denegando login", username, err.Error())
 			return user, ErrCircuitBreakerOpen
 		}
 	}
