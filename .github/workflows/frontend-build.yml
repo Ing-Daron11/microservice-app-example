@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: microappdevacryckctn.azurecr.io
+  REGISTRY: microappdevacr7tnrzw.azurecr.io
   SERVICE: frontend
 
 jobs:

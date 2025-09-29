@@ -9,9 +9,10 @@ on:
     branches: [master]
     paths:
       - 'log-message-processor/**'
+  workflow_dispatch:
 
 env:
-  REGISTRY: microappdevacryckctn.azurecr.io
+  REGISTRY: microappdevacr7tnrzw.azurecr.io
   SERVICE: log-message-processor
 
 jobs:

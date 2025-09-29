@@ -9,9 +9,11 @@ on:
     branches: [master]
     paths:
       - 'todos-api/**'
+  workflow_dispatch:
+
 
 env:
-  REGISTRY: microappdevacryckctn.azurecr.io
+  REGISTRY: microappdevacr7tnrzw.azurecr.io
   SERVICE: todos-api
 
 jobs:

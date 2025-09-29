@@ -9,9 +9,10 @@ on:
     branches: [master]
     paths:
       - 'users-api/**'
+  workflow_dispatch:
 
 env:
-  REGISTRY: microappdevacryckctn.azurecr.io
+  REGISTRY: microappdevacr7tnrzw.azurecr.io
   SERVICE: users-api
 
 jobs:
