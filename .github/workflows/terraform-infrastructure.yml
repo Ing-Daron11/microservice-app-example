@@ -90,4 +90,4 @@ jobs:
         az containerapp update \
           --name microapp-${{ inputs.environment || 'dev' }}-${{ matrix.service }}-ca \
           --resource-group ${{ env.RESOURCE_GROUP }} \
-          --image microappdevacr.azurecr.io/${{ matrix.service }}:latest
+          --image microappdevacryckctn.azurecr.io/${{ matrix.service }}:latest

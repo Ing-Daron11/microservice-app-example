@@ -11,7 +11,7 @@ on:
       - 'frontend/**'
 
 env:
-  REGISTRY: microappdevacr.azurecr.io
+  REGISTRY: microappdevacryckctn.azurecr.io
   SERVICE: frontend
 
 jobs:

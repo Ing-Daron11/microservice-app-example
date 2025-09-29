@@ -11,7 +11,7 @@ on:
       - 'todos-api/**'
 
 env:
-  REGISTRY: microappdevacr.azurecr.io
+  REGISTRY: microappdevacryckctn.azurecr.io
   SERVICE: todos-api
 
 jobs:

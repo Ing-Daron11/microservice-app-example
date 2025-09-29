@@ -11,7 +11,7 @@ on:
       - 'log-message-processor/**'
 
 env:
-  REGISTRY: microappdevacr.azurecr.io
+  REGISTRY: microappdevacryckctn.azurecr.io
   SERVICE: log-message-processor
 
 jobs:

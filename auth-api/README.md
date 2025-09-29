@@ -52,3 +52,5 @@ Here you can find the software required to run this microservice, as well as the
 |  Dependency | Version  |
 |-------------|----------|
 | Go          | 1.18.2   |
+
+test pipelinesx2

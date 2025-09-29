@@ -32,4 +32,4 @@ Here you can find the software required to run this microservice, as well as the
 |-------------|----------|
 | Java        | openJDK8 |
 
-test pipeline
+test pipeline x2

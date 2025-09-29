@@ -30,5 +30,5 @@ Here you can find the software required to run this microservice, as well as the
 | Node        | 8.17.0   |
 | NPM         | 6.13.4   |
 
-# test pipeline
+# test pipeline x2
 

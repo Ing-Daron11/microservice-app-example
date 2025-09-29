@@ -11,7 +11,7 @@ on:
       - 'users-api/**'
 
 env:
-  REGISTRY: microappdevacr.azurecr.io
+  REGISTRY: microappdevacryckctn.azurecr.io
   SERVICE: users-api
 
 jobs:
