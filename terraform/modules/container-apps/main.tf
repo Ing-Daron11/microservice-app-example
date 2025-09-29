@@ -149,3 +149,48 @@ resource "azurerm_container_app" "microservices" {
   depends_on = [azurerm_container_app.redis, azurerm_container_app.zipkin]
 }
 
+#=====  No borrar Miguel!!   ======
+# Status Service Container App 
+ resource "azurerm_container_app" "status_service" {
+   name                         = "${var.prefix}-status-service-ca"
+   container_app_environment_id = azurerm_container_app_environment.main.id
+   resource_group_name          = var.resource_group_name
+   revision_mode                = "Single"
+
+   template {
+     container {
+       name   = "status-service"
+       image  = "${var.acr_login_server}/status-service:latest"
+       cpu    = 0.25
+       memory = "0.5Gi"
+     }
+
+     min_replicas = 1
+     max_replicas = 1
+   }
+
+   ingress {
+     allow_insecure_connections = false
+     external_enabled           = true
+     target_port                = 3000
+
+     traffic_weight {
+       percentage      = 100
+       latest_revision = true
+     }
+   }
+
+   secret {
+     name  = "acr-password"
+     value = var.acr_admin_password
+   }
+
+   registry {
+     server   = var.acr_login_server
+     username = var.acr_admin_username
+     password_secret_name = "acr-password"
+   }
+
+   tags = var.tags
+ }
+
