@@ -31,3 +31,5 @@ Here you can find the software required to run this microservice, as well as the
 |  Dependency | Version  |
 |-------------|----------|
 | Java        | openJDK8 |
+
+test pipeline
